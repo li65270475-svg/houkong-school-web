@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>濠江中学奖项申报 - 登录</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <div class="logo">
+                    <img src="architecture.png" alt="濠江中学">
+                </div>
+                <h1>濠江中学</h1>
+                <p>学生奖项申报系统</p>
+            </div>
+
+            <form id="loginForm" novalidate>
+                <!-- 角色选择 -->
+                <div class="role-selector">
+                    <button type="button" class="role-btn active" data-role="student" onclick="selectRole('student')">
+                        <i class="fa fa-user-graduate"></i>
+                        <span>学生入口</span>
+                    </button>
+                    <button type="button" class="role-btn" data-role="teacher" onclick="selectRole('teacher')">
+                        <i class="fa fa-chalkboard-teacher"></i>
+                        <span>教师入口</span>
+                    </button>
+                    <button type="button" class="role-btn" data-role="admin" onclick="selectRole('admin')">
+                        <i class="fa fa-shield-alt"></i>
+                        <span>管理员</span>
+                    </button>
+                </div>
+
+                <input type="hidden" id="selectedRole" value="student">
+
+                <div class="form-group">
+                    <label for="username" id="accountLabel">学号 <span class="required">*</span></label>
+                    <input type="text" id="username" placeholder="请输入学号/工号/管理员账号" required>
+                    <div class="error-msg">请输入账号</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">密码 <span class="required">*</span></label>
+                    <input type="password" id="password" placeholder="请输入密码" required>
+                    <div class="error-msg">请输入密码</div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block" id="loginBtn">
+                    <i class="fa fa-sign-in-alt"></i> 登 录
+                </button>
+            </form>
+
+            <div style="margin-top: 25px; padding: 18px; background: var(--light-bg); border-radius: var(--radius); font-size: 13px; color: var(--medium-text);">
+                <p style="margin-bottom: 10px; font-weight: 600; color: var(--dark-text); display: flex; align-items: center; gap: 6px;">
+                    <i class="fa fa-info-circle" style="color: var(--primary-color);"></i> 测试账号
+                </p>
+                <div style="display: grid; gap: 6px;">
+                    <p><strong style="color: var(--primary-color);">学生：</strong>s001 / 123456</p>
+                    <p><strong style="color: var(--success-color);">教师：</strong>t001 / 123456</p>
+                    <p><strong style="color: var(--warning-color);">管理员：</strong>admin / 123456</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let selectedRole = 'student';
+        let isSubmitting = false;
+
+        // 角色选择
+        function selectRole(role) {
+            selectedRole = role;
+            document.getElementById('selectedRole').value = role;
+            
+            const labels = {
+                student: '学号',
+                teacher: '工号',
+                admin: '管理员账号'
+            };
+            document.getElementById('accountLabel').innerHTML = `${labels[role]} <span class="required">*</span>`;
+            document.getElementById('username').placeholder = `请输入${labels[role]}`;
+
+            // 更新选中状态
+            document.querySelectorAll('.role-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-role="${role}"]`).classList.add('active');
+            
+            // 清除错误状态
+            document.getElementById('username').classList.remove('error');
+            document.getElementById('password').classList.remove('error');
+        }
+
+        // 实时输入验证
+        document.getElementById('username').addEventListener('input', function() {
+            this.classList.remove('error');
+        });
+        document.getElementById('password').addEventListener('input', function() {
+            this.classList.remove('error');
+        });
+
+        // 表单提交
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (isSubmitting) return;
+            
+            const username = document.getElementById('username');
+            const password = document.getElementById('password');
+            
+            // 验证
+            let isValid = true;
+            
+            if (!username.value.trim()) {
+                username.classList.add('error');
+                isValid = false;
+            }
+            
+            if (!password.value.trim()) {
+                password.classList.add('error');
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                Toast.show('请填写完整的登录信息', 'warning');
+                return;
+            }
+
+            // 防重复提交
+            isSubmitting = true;
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> 登录中...';
+
+            const role = document.getElementById('selectedRole').value;
+            const result = Auth.login(username.value.trim(), password.value, role);
+
+            if (result.success) {
+                Toast.show('登录成功！正在跳转...', 'success');
+                
+                const pageMap = {
+                    'student': 'student.html',
+                    'teacher': 'teacher.html',
+                    'admin': 'admin.html'
+                };
+                
+                setTimeout(() => {
+                    window.location.href = pageMap[role];
+                }, 500);
+            } else {
+                Toast.show(result.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa fa-sign-in-alt"></i> 登 录';
+                isSubmitting = false;
+                
+                // 密码错误抖动效果
+                password.classList.add('error');
+                password.value = '';
+                password.focus();
+            }
+        });
+
+        // 初始化
+        DataStore.init();
+    </script>
+</body>
+</html>

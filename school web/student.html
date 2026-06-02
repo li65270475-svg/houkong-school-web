@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生页面 - 濠江中学奖项申报</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <header class="header">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()">
+            <i class="fa fa-bars"></i>
+        </button>
+        <div class="header-content">
+            <div class="logo-area">
+                <div class="logo">
+                    <img src="architecture.png" alt="濠江中学">
+                </div>
+                <h1>濠江中学奖项申报</h1>
+            </div>
+            <div class="user-area">
+                <button class="notify-btn" onclick="openNotificationPanel()" style="position:relative;background:#f5f5f5;border:none;padding:10px 14px;border-radius:10px;cursor:pointer;font-size:16px;color:#666;transition:all 0.2s;">
+                    <i class="fa fa-bell"></i>
+                    <span class="notification-badge" style="position:absolute;top:2px;right:2px;background:#ef4444;color:white;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:none;align-items:center;justify-content:center;padding:0 5px;"></span>
+                </button>
+                <div class="user-info" style="margin-left:16px;">
+                    <div class="user-avatar">
+                        <i class="fa fa-user-graduate"></i>
+                    </div>
+                    <div>
+                        <div class="user-name" id="userName">-</div>
+                        <div class="user-role" id="userClass">-</div>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fa fa-sign-out-alt"></i> 退出
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <aside class="sidebar" id="sidebar">
+        <nav class="nav-menu">
+            <div class="nav-item active" onclick="switchTab('list')">
+                <i class="fa fa-trophy"></i>
+                <span>我的获奖</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('apply')">
+                <i class="fa fa-plus-circle"></i>
+                <span>申请录入</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('drafts')">
+                <i class="fa fa-file-alt"></i>
+                <span>我的草稿</span>
+            </div>
+            <div class="nav-item" onclick="goToPage('main.html')">
+                <i class="fa fa-home"></i>
+                <span>返回主页</span>
+            </div>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-title">
+            <h2>我的获奖记录</h2>
+            <p>查看和提交您的获奖信息</p>
+        </div>
+
+        <!-- 统计卡片 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon blue">
+                    <i class="fa fa-trophy"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="totalAwards">0</h3>
+                    <p>累计获奖</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green">
+                    <i class="fa fa-check-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="approvedAwards">0</h3>
+                    <p>已通过</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orange">
+                    <i class="fa fa-clock"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="pendingAwards">0</h3>
+                    <p>审核中</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 标签页 -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('list', this)">
+                <i class="fa fa-list"></i> 获奖列表
+            </button>
+            <button class="tab-btn" onclick="switchTab('apply', this)">
+                <i class="fa fa-plus"></i> 申请录入
+            </button>
+            <button class="tab-btn" onclick="switchTab('drafts', this)">
+                <i class="fa fa-file-alt"></i> 我的草稿
+            </button>
+        </div>
+
+        <!-- 获奖列表 -->
+        <div id="listTab" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">我的获奖记录</h3>
+                    <button class="btn btn-primary btn-sm" onclick="switchTab('apply', document.querySelectorAll('.tab-btn')[1])">
+                        <i class="fa fa-plus"></i> 新增获奖
+                    </button>
+                </div>
+                
+                <div class="search-bar">
+                    <div class="search-input">
+                        <i class="fa fa-search"></i>
+                        <input type="text" id="searchKeyword" placeholder="搜索奖项名称..." oninput="filterAwards()">
+                    </div>
+                    <select class="filter-select" id="yearFilter" onchange="filterAwards()">
+                        <option value="">全部年份</option>
+                        <option value="2026">2026年</option>
+                        <option value="2025">2025年</option>
+                        <option value="2024">2024年</option>
+                        <option value="2023">2023年</option>
+                        <option value="2022">2022年</option>
+                    </select>
+                    <select class="filter-select" id="levelFilter" onchange="filterAwards()">
+                        <option value="">全部级别</option>
+                    </select>
+                    <select class="filter-select" id="statusFilter" onchange="filterAwards()">
+                        <option value="">全部状态</option>
+                        <option value="pending">待审核</option>
+                        <option value="approved">已通过</option>
+                        <option value="rejected">已驳回</option>
+                    </select>
+                </div>
+
+                <div id="awardsTable"></div>
+            </div>
+        </div>
+
+        <!-- 申请录入表单 -->
+        <div id="applyTab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fa fa-edit"></i> 新增获奖信息
+                    </h3>
+                </div>
+                
+                <form id="awardForm" novalidate>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="awardCategory">奖项分类 <span class="required">*</span></label>
+                            <select id="awardCategory" required>
+                                <option value="">请选择奖项分类</option>
+                            </select>
+                            <div class="error-msg">请选择奖项分类</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="awardName">奖项名称 <span class="required">*</span></label>
+                            <input type="text" id="awardName" placeholder="如：数学竞赛一等奖" required maxlength="50">
+                            <div class="error-msg">请输入奖项名称</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="awardLevel">获奖级别 <span class="required">*</span></label>
+                            <select id="awardLevel" required>
+                                <option value="">请选择获奖级别</option>
+                            </select>
+                            <div class="error-msg">请选择获奖级别</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="awardDate">获奖日期 <span class="required">*</span></label>
+                            <input type="date" id="awardDate" required max="">
+                            <div class="error-msg">请选择获奖日期</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="organizer">主办单位</label>
+                            <input type="text" id="organizer" placeholder="如：教务处" maxlength="50">
+                        </div>
+                        <div class="form-group">
+                            <label for="certImage">证书图片</label>
+                            <div class="file-upload" onclick="document.getElementById('certImage').click()">
+                                <i class="fa fa-cloud-upload-alt"></i>
+                                <p>点击上传证书图片</p>
+                                <span style="font-size: 12px; color: var(--light-text);">支持 JPG、PNG 格式，最大2MB</span>
+                                <input type="file" id="certImage" accept="image/*" style="display:none;">
+                            </div>
+                            <div class="preview-container" id="previewContainer" style="display:none;">
+                                <img id="imagePreview" class="preview-image">
+                                <button type="button" class="btn btn-sm btn-secondary" onclick="clearImagePreview()" style="margin-top:10px;">
+                                    <i class="fa fa-trash-alt"></i> 移除图片
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row full">
+                        <div class="form-group">
+                            <label for="description">获奖说明</label>
+                            <textarea id="description" rows="3" placeholder="简要描述获奖情况..." maxlength="200"></textarea>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 25px;">
+                        <button type="button" class="btn btn-secondary" onclick="switchTab('list', document.querySelectorAll('.tab-btn')[0])">
+                            <i class="fa fa-arrow-left"></i> 返回
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" onclick="saveDraft()" style="border-color: var(--primary-color); color: var(--primary-color);">
+                            <i class="fa fa-save"></i> 存为草稿
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fa fa-paper-plane"></i> 提交申请
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 我的草稿 -->
+        <div id="draftsTab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fa fa-file-alt"></i> 我的草稿</h3>
+                </div>
+                <div id="draftsList"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 查看详情模态框 -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>获奖详情</h3>
+                <button class="modal-close" onclick="UI.closeModal('detailModal')">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="detailContent"></div>
+            <div class="modal-footer" id="detailFooter">
+                <button class="btn btn-secondary" onclick="UI.closeModal('detailModal')">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改被驳回记录模态框 -->
+    <div id="editRejectedModal" class="modal">
+        <div class="modal-content" style="max-width:600px;">
+            <div class="modal-header">
+                <h3>修改获奖申请</h3>
+                <button class="modal-close" onclick="UI.closeModal('editRejectedModal')">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="max-height:70vh;overflow-y:auto;">
+                <div id="editRejectedInfo" style="margin-bottom:15px;padding:12px;background:#fff5f5;border-left:4px solid var(--danger-color);border-radius:6px;">
+                    <div style="font-size:12px;color:var(--danger-color);font-weight:500;margin-bottom:6px;">
+                        <i class="fa fa-exclamation-triangle"></i> 原驳回原因：
+                    </div>
+                    <div id="originalRejectReason" style="color:#333;line-height:1.6;"></div>
+                </div>
+                <form id="editRejectedForm">
+                    <input type="hidden" id="editAwardId">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>奖项分类 <span class="required">*</span></label>
+                            <select id="editAwardCategory" required>
+                                <option value="">请选择分类</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>奖项名称 <span class="required">*</span></label>
+                            <input type="text" id="editAwardName" placeholder="如：数学竞赛一等奖" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>获奖级别 <span class="required">*</span></label>
+                            <select id="editAwardLevel" required>
+                                <option value="">请选择级别</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>获奖日期 <span class="required">*</span></label>
+                            <input type="date" id="editAwardDate" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>主办单位</label>
+                        <input type="text" id="editOrganizer" placeholder="如：教务处">
+                    </div>
+                    <div class="form-group">
+                        <label>获奖说明</label>
+                        <textarea id="editDescription" rows="3" placeholder="请简要说明获奖情况..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>上传证书图片</label>
+                        <div class="file-upload" onclick="document.getElementById('editCertificateImage').click()">
+                            <i class="fa fa-cloud-upload-alt"></i>
+                            <span id="editImageText">点击上传证书图片</span>
+                            <input type="file" id="editCertificateImage" accept="image/*" style="display:none" onchange="handleEditImageUpload(this)">
+                        </div>
+                        <img id="editImagePreview" style="display:none;max-width:100%;max-height:200px;margin-top:10px;border-radius:8px;">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="UI.closeModal('editRejectedModal')">取消</button>
+                <button class="btn btn-primary" onclick="submitResubmit()">
+                    <i class="fa fa-paper-plane"></i> 重新提交
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let myAwards = [];
+        let categories = [];
+        let isSubmitting = false;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 权限验证
+            if (!Auth.checkLogin()) {
+                window.location.href = 'index.html';
+                return;
+            }
+            if (!Auth.hasRole('student')) {
+                Toast.show('您没有权限访问此页面', 'error');
+                setTimeout(() => window.location.href = 'index.html', 1500);
+                return;
+            }
+
+            // 初始化数据
+            DataStore.init();
+
+            const user = Auth.getCurrentUser();
+            document.getElementById('userName').textContent = user.name;
+            document.getElementById('userClass').textContent = user.classId ? DataStore.getClass(user.classId)?.name : '未知班级';
+
+            // 限制日期不能选未来
+            document.getElementById('awardDate').max = new Date().toISOString().split('T')[0];
+
+            loadCategories();
+            loadAwardLevels();
+            loadMyAwards();
+            loadDrafts();
+            setupImagePreview();
+
+            // 初始化快捷键
+            KeyboardShortcuts.init();
+
+            // 检查截止日期提醒
+            setTimeout(() => {
+                const reminder = ReminderManager.checkDeadlineReminder();
+                ReminderManager.showReminder(reminder);
+            }, 800);
+
+            // 检查是否有未恢复的草稿
+            setTimeout(() => {
+                if (DraftManager.hasDraft(user.id)) {
+                    showDraftRestoreModal();
+                }
+            }, 1000);
+        });
+
+        // 加载分类
+        function loadCategories() {
+            categories = DataStore.get('categories');
+
+            // 填充新建表单的下拉框
+            const select = document.getElementById('awardCategory');
+            select.innerHTML = '<option value="">请选择分类</option>';
+            categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.id;
+                option.textContent = cat.name;
+                select.appendChild(option);
+            });
+
+            // 填充编辑表单的下拉框
+            const editSelect = document.getElementById('editAwardCategory');
+            if (editSelect) {
+                editSelect.innerHTML = '<option value="">请选择分类</option>';
+                categories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.name;
+                    editSelect.appendChild(option);
+                });
+            }
+
+            // 动态加载奖项级别
+            loadAwardLevels();
+        }
+
+        // 加载奖项级别
+        function loadAwardLevels() {
+            let levels = DataStore.get('levels');
+            if (!levels || levels.length === 0) {
+                levels = [
+                    { id: 'level_1', name: '班级级', sort: 1 },
+                    { id: 'level_2', name: '校级', sort: 2 },
+                    { id: 'level_3', name: '区级', sort: 3 },
+                    { id: 'level_4', name: '市级', sort: 4 },
+                    { id: 'level_5', name: '省级', sort: 5 },
+                    { id: 'level_6', name: '国家级', sort: 6 },
+                    { id: 'level_7', name: '国际级', sort: 7 }
+                ];
+            }
+            levels = levels.sort((a, b) => (a.sort || 0) - (b.sort || 0));
+
+            ['awardLevel', 'editAwardLevel'].forEach(id => {
+                const select = document.getElementById(id);
+                if (select) {
+                    const currentValue = select.value;
+                    select.innerHTML = '<option value="">请选择级别</option>';
+                    levels.forEach(level => {
+                        const option = document.createElement('option');
+                        option.value = level.name;
+                        option.textContent = level.name;
+                        select.appendChild(option);
+                    });
+                    if (currentValue) select.value = currentValue;
+                }
+            });
+
+            // 填充筛选下拉框
+            const levelFilter = document.getElementById('levelFilter');
+            if (levelFilter) {
+                const currentValue = levelFilter.value;
+                levelFilter.innerHTML = '<option value="">全部级别</option>';
+                levels.forEach(level => {
+                    const option = document.createElement('option');
+                    option.value = level.name;
+                    option.textContent = level.name;
+                    levelFilter.appendChild(option);
+                });
+                if (currentValue) levelFilter.value = currentValue;
+            }
+        }
+
+        // 加载获奖记录
+        function loadMyAwards() {
+            const user = Auth.getCurrentUser();
+            myAwards = AwardManager.getMyAwards(user.id);
+            updateStats();
+            renderAwardsTable(myAwards);
+        }
+
+        // 加载草稿列表
+        function loadDrafts() {
+            const user = Auth.getCurrentUser();
+            const draft = DraftManager.get(user.id);
+            const container = document.getElementById('draftsList');
+
+            if (!draft) {
+                container.innerHTML = `
+                    <div style="padding: 40px; text-align: center; color: var(--medium-text);">
+                        <i class="fa fa-file-alt" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
+                        <p style="margin-bottom: 20px;">暂无草稿</p>
+                        <button class="btn btn-primary" onclick="switchTab('apply', document.querySelectorAll('.tab-btn')[1])">
+                            <i class="fa fa-plus"></i> 新建申请
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            const formData = draft.formData;
+            const updateTime = new Date(draft.updateTime).toLocaleString('zh-CN');
+
+            container.innerHTML = `
+                <div style="padding: 20px;">
+                    <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 12px; padding: 20px; margin-bottom: 20px; border-left: 4px solid #f59e0b;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                            <i class="fa fa-clock-o" style="color: #b45309; font-size: 20px;"></i>
+                            <span style="color: #92400e; font-weight: 500;">草稿信息</span>
+                        </div>
+                        <p style="color: #78350f; font-size: 14px; margin-bottom: 8px;">最后保存时间：${updateTime}</p>
+                    </div>
+
+                    <div style="background: var(--light-bg); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 15px; color: #333;">草稿内容预览</h4>
+                        <div style="display: grid; gap: 12px;">
+                            ${formData.awardName ? `<div style="display: flex; gap: 10px;"><span style="color: #666; min-width: 80px;">奖项名称：</span><span style="color: #333;">${escapeHtml(formData.awardName)}</span></div>` : ''}
+                            ${formData.categoryName ? `<div style="display: flex; gap: 10px;"><span style="color: #666; min-width: 80px;">奖项分类：</span><span style="color: #333;">${escapeHtml(formData.categoryName)}</span></div>` : ''}
+                            ${formData.awardLevel ? `<div style="display: flex; gap: 10px;"><span style="color: #666; min-width: 80px;">获奖级别：</span><span style="color: #333;">${escapeHtml(formData.awardLevel)}</span></div>` : ''}
+                            ${formData.awardDate ? `<div style="display: flex; gap: 10px;"><span style="color: #666; min-width: 80px;">获奖日期：</span><span style="color: #333;">${escapeHtml(formData.awardDate)}</span></div>` : ''}
+                            ${formData.organizer ? `<div style="display: flex; gap: 10px;"><span style="color: #666; min-width: 80px;">主办单位：</span><span style="color: #333;">${escapeHtml(formData.organizer)}</span></div>` : ''}
+                            ${formData.description ? `<div style="display: flex; gap: 10px;"><span style="color: #666; min-width: 80px;">获奖说明：</span><span style="color: #333;">${escapeHtml(formData.description)}</span></div>` : ''}
+                            ${formData.certificateImage ? `<div style="display: flex; gap: 10px;"><span style="color: #666; min-width: 80px;">证书图片：</span><span style="color: #333;"><i class="fa fa-check-circle" style="color: var(--success-color);"></i> 已上传</span></div>` : ''}
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="restoreDraft(); switchTab('apply', document.querySelectorAll('.tab-btn')[1]);">
+                            <i class="fa fa-edit"></i> 编辑并提交
+                        </button>
+                        <button class="btn btn-outline-danger" onclick="deleteDraft()">
+                            <i class="fa fa-trash"></i> 删除草稿
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 删除草稿
+        function deleteDraft() {
+            if (!confirm('确定要删除这份草稿吗？删除后无法恢复。')) return;
+
+            const user = Auth.getCurrentUser();
+            DraftManager.delete(user.id);
+            Toast.show('草稿已删除', 'success');
+            loadDrafts();
+        }
+
+        // 更新统计
+        function updateStats() {
+            document.getElementById('totalAwards').textContent = myAwards.length;
+            document.getElementById('approvedAwards').textContent = myAwards.filter(a => a.status === 'approved').length;
+            document.getElementById('pendingAwards').textContent = myAwards.filter(a => a.status === 'pending').length;
+        }
+
+        // 渲染表格
+        function renderAwardsTable(awards) {
+            const columns = [
+                { title: '奖项名称', key: 'awardName' },
+                { title: '奖项分类', key: 'categoryName' },
+                { title: '获奖级别', key: 'awardLevel' },
+                { title: '获奖日期', key: 'awardDate', type: 'date' },
+                { title: '审核进度', key: 'status', type: 'progress' }
+            ];
+
+            UI.renderTable('awardsTable', awards, columns, [
+                { text: '查看', class: 'view', handler: 'showDetail' }
+            ]);
+        }
+
+        // 筛选
+        function filterAwards() {
+            const keyword = document.getElementById('searchKeyword').value.toLowerCase();
+            const year = document.getElementById('yearFilter').value;
+            const level = document.getElementById('levelFilter').value;
+            const status = document.getElementById('statusFilter').value;
+
+            let filtered = myAwards;
+
+            if (keyword) {
+                filtered = filtered.filter(a => a.awardName.toLowerCase().includes(keyword));
+            }
+
+            if (year) {
+                filtered = filtered.filter(a => a.awardDate && a.awardDate.startsWith(year));
+            }
+
+            if (level) {
+                filtered = filtered.filter(a => a.awardLevel === level);
+            }
+
+            if (status) {
+                filtered = filtered.filter(a => a.status === status);
+            }
+
+            renderAwardsTable(filtered);
+        }
+
+        // 切换标签页
+        function switchTab(tab, btn) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+            document.getElementById(tab + 'Tab').classList.add('active');
+            if (btn) {
+                btn.classList.add('active');
+            }
+
+            // 高亮对应的导航项
+            const navMap = { list: 0, apply: 1, drafts: 2 };
+            if (navMap[tab] !== undefined) {
+                document.querySelectorAll('.nav-item')[navMap[tab]]?.classList.add('active');
+            }
+
+            // 切换到草稿标签时刷新
+            if (tab === 'drafts') {
+                loadDrafts();
+            }
+        }
+
+        // 图片预览
+        function setupImagePreview() {
+            const input = document.getElementById('certImage');
+            const preview = document.getElementById('imagePreview');
+            const container = document.getElementById('previewContainer');
+            
+            input.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                if (!file.type.startsWith('image/')) {
+                    Toast.show('请选择图片文件', 'error');
+                    return;
+                }
+
+                if (file.size > 2 * 1024 * 1024) {
+                    Toast.show('图片大小不能超过2MB', 'error');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.src = e.target.result;
+                    container.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function clearImagePreview() {
+            document.getElementById('certImage').value = '';
+            document.getElementById('imagePreview').src = '';
+            document.getElementById('previewContainer').style.display = 'none';
+        }
+
+        // 查看详情
+        function showDetail(awardId) {
+            const award = myAwards.find(a => a.id === awardId);
+            if (!award) return;
+
+            let progressHtml = '<div style="margin: 15px 0; padding: 18px; background: var(--light-bg); border-radius: var(--radius);">';
+            
+            if (award.status === 'approved') {
+                progressHtml += `
+                    <div style="display: flex; align-items: center; color: var(--success-color); font-weight: 500;">
+                        <i class="fa fa-check-circle" style="margin-right: 8px;"></i> 已完成审核
+                    </div>
+                `;
+            } else if (award.status === 'rejected') {
+                progressHtml += `
+                    <div style="display: flex; align-items: center; color: var(--danger-color); font-weight: 500;">
+                        <i class="fa fa-times-circle" style="margin-right: 8px;"></i> 已驳回
+                    </div>
+                `;
+            } else {
+                progressHtml += `
+                    <div style="margin-bottom: 10px; display: flex; align-items: center;">
+                        <i class="fa ${award.teacherApproved ? 'fa-check-circle' : 'fa-clock'}" 
+                           style="color: ${award.teacherApproved ? 'var(--success-color)' : 'var(--warning-color)'}; margin-right: 8px;"></i>
+                        <span style="color: ${award.teacherApproved ? 'var(--success-color)' : 'var(--medium-text)'};">
+                            ${award.teacherApproved ? '✓ ' : '○ '}教师审核
+                        </span>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <i class="fa fa-clock" style="color: var(--light-text); margin-right: 8px;"></i>
+                        <span style="color: var(--medium-text);">○ 管理员终审</span>
+                    </div>
+                `;
+            }
+            progressHtml += '</div>';
+
+            // 添加驳回信息的引用
+            const rejectInfo = award.rejectReason ? `
+                <div style="margin-top: 15px; padding: 12px; background: #fff5f5; border-left: 4px solid var(--danger-color); border-radius: 6px;">
+                    <div style="font-size: 12px; color: var(--danger-color); font-weight: 500; margin-bottom: 6px;">
+                        <i class="fa fa-info-circle"></i> 驳回原因（由${award.rejectBy === 'teacher' ? '教师' : '管理员'}于 ${award.rejectTime} 驳回）
+                    </div>
+                    <div style="color: #333; line-height: 1.6;">${award.rejectReason}</div>
+                </div>
+            ` : '';
+
+            document.getElementById('detailContent').innerHTML = `
+                <div class="info-list">
+                    <div class="info-item">
+                        <div class="label">奖项名称</div>
+                        <div class="value">${escapeHtml(award.awardName)}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">奖项分类</div>
+                        <div class="value">${escapeHtml(award.categoryName)}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">获奖级别</div>
+                        <div class="value">${escapeHtml(award.awardLevel)}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">获奖日期</div>
+                        <div class="value">${UI.formatDate(award.awardDate)}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">主办单位</div>
+                        <div class="value">${escapeHtml(award.organizer) || '-'}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">获奖说明</div>
+                        <div class="value">${escapeHtml(award.description) || '-'}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">当前状态</div>
+                        <div class="value">${UI.getStatusBadge(award.status)}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">申请时间</div>
+                        <div class="value">${escapeHtml(award.createTime)}</div>
+                    </div>
+                </div>
+                <h4 style="margin: 20px 0 10px; color: var(--primary-color);">审核进度</h4>
+                ${progressHtml}
+                ${rejectInfo}
+            `;
+
+            // 设置底部按钮
+            if (award.status === 'rejected') {
+                document.getElementById('detailFooter').innerHTML = `
+                    <button class="btn btn-secondary" onclick="UI.closeModal('detailModal')">关闭</button>
+                    <button class="btn btn-primary" onclick="openEditRejectedModal('${escapeHtml(award.id)}')">
+                        <i class="fa fa-edit"></i> 根据驳回原因修改
+                    </button>
+                `;
+            } else {
+                document.getElementById('detailFooter').innerHTML = `
+                    <button class="btn btn-secondary" onclick="UI.closeModal('detailModal')">关闭</button>
+                `;
+            }
+
+            UI.openModal('detailModal');
+        }
+
+        // 打开修改被驳回记录的模态框
+        function openEditRejectedModal(awardId) {
+            const award = myAwards.find(a => a.id === awardId);
+            if (!award) return;
+
+            UI.closeModal('detailModal');
+
+            document.getElementById('editAwardId').value = award.id;
+            document.getElementById('originalRejectReason').textContent = award.rejectReason || '无';
+
+            // 填充表单
+            document.getElementById('editAwardCategory').value = award.categoryId;
+            document.getElementById('editAwardName').value = award.awardName;
+            document.getElementById('editAwardLevel').value = award.awardLevel;
+            document.getElementById('editAwardDate').value = award.awardDate;
+            document.getElementById('editOrganizer').value = award.organizer || '';
+            document.getElementById('editDescription').value = award.description || '';
+
+            if (award.certificateImage) {
+                document.getElementById('editImagePreview').src = award.certificateImage;
+                document.getElementById('editImagePreview').style.display = 'block';
+                document.getElementById('editImageText').textContent = '点击更换图片';
+            } else {
+                document.getElementById('editImagePreview').style.display = 'none';
+                document.getElementById('editImageText').textContent = '点击上传证书图片';
+            }
+
+            UI.openModal('editRejectedModal');
+        }
+
+        // 处理编辑模态框中的图片上传
+        function handleEditImageUpload(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('editImagePreview').src = e.target.result;
+                    document.getElementById('editImagePreview').style.display = 'block';
+                    document.getElementById('editImageText').textContent = '点击更换图片';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // 提交重新修改的申请
+        function submitResubmit() {
+            const awardId = document.getElementById('editAwardId').value;
+
+            const categorySelect = document.getElementById('editAwardCategory');
+            const awardName = document.getElementById('editAwardName');
+            const awardLevel = document.getElementById('editAwardLevel');
+            const awardDate = document.getElementById('editAwardDate');
+
+            let isValid = true;
+
+            if (!categorySelect.value) {
+                categorySelect.classList.add('error');
+                isValid = false;
+            }
+            if (!awardName.value.trim()) {
+                awardName.classList.add('error');
+                isValid = false;
+            }
+            if (!awardLevel.value) {
+                awardLevel.classList.add('error');
+                isValid = false;
+            }
+            if (!awardDate.value) {
+                awardDate.classList.add('error');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                Toast.show('请填写所有必填项', 'warning');
+                return;
+            }
+
+            const category = categories.find(c => c.id === categorySelect.value);
+
+            const awardData = {
+                awardName: awardName.value.trim(),
+                categoryId: categorySelect.value,
+                categoryName: category ? category.name : '',
+                awardLevel: awardLevel.value,
+                awardDate: awardDate.value,
+                organizer: document.getElementById('editOrganizer').value.trim(),
+                description: document.getElementById('editDescription').value.trim(),
+                certificateImage: document.getElementById('editImagePreview').src || ''
+            };
+
+            const result = AwardManager.resubmitAward(awardId, awardData);
+
+            if (result.success) {
+                Toast.show('修改提交成功，请等待审核！', 'success');
+                UI.closeModal('editRejectedModal');
+                loadMyAwards();
+            } else {
+                Toast.show(result.message || '提交失败，请重试', 'error');
+            }
+        }
+
+        // 表单提交
+        document.getElementById('awardForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (isSubmitting) return;
+
+            // 验证表单
+            const category = document.getElementById('awardCategory');
+            const awardName = document.getElementById('awardName');
+            const awardLevel = document.getElementById('awardLevel');
+            const awardDate = document.getElementById('awardDate');
+
+            let isValid = true;
+
+            if (!category.value) {
+                category.classList.add('error');
+                isValid = false;
+            }
+            if (!awardName.value.trim()) {
+                awardName.classList.add('error');
+                isValid = false;
+            }
+            if (!awardLevel.value) {
+                awardLevel.classList.add('error');
+                isValid = false;
+            }
+            if (!awardDate.value) {
+                awardDate.classList.add('error');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                Toast.show('请填写所有必填项', 'warning');
+                return;
+            }
+
+            isSubmitting = true;
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> 提交中...';
+
+            const user = Auth.getCurrentUser();
+            const cat = categories.find(c => c.id === category.value);
+            const imagePreview = document.getElementById('imagePreview');
+            const imageData = imagePreview && imagePreview.src && imagePreview.src.startsWith('data:') ? imagePreview.src : '';
+
+            const awardData = {
+                categoryId: category.value,
+                categoryName: cat ? cat.name : '',
+                awardName: awardName.value.trim(),
+                awardLevel: awardLevel.value,
+                awardDate: awardDate.value,
+                organizer: document.getElementById('organizer').value.trim(),
+                description: document.getElementById('description').value.trim(),
+                certificateImage: imageData
+            };
+
+            try {
+                const result = AwardManager.submitAward(awardData);
+
+                if (result.success) {
+                    DraftManager.delete(user.id);
+                    Toast.show('提交成功，请等待审核！', 'success');
+                    this.reset();
+                    clearImagePreview();
+                    loadMyAwards();
+                    switchTab('list', document.querySelectorAll('.tab-btn')[0]);
+                } else {
+                    Toast.show(result.message || '提交失败，请重试', 'error');
+                }
+            } catch (err) {
+                console.error('提交错误:', err);
+                Toast.show('提交出错，请重试', 'error');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa fa-paper-plane"></i> 提交申请';
+            isSubmitting = false;
+        });
+
+        // 实时验证
+        ['awardCategory', 'awardName', 'awardLevel', 'awardDate'].forEach(id => {
+            document.getElementById(id)?.addEventListener('change', function() {
+                this.classList.remove('error');
+            });
+        });
+
+        // 保存草稿
+        function saveDraft() {
+            const user = Auth.getCurrentUser();
+            const category = document.getElementById('awardCategory').value;
+            const awardName = document.getElementById('awardName').value.trim();
+            const awardLevel = document.getElementById('awardLevel').value;
+            const awardDate = document.getElementById('awardDate').value;
+            const organizer = document.getElementById('organizer').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const certificateImage = document.getElementById('imagePreview').src || '';
+
+            if (!category && !awardName && !awardLevel && !awardDate) {
+                Toast.show('请至少填写部分内容后再保存草稿', 'warning');
+                return;
+            }
+
+            const categoryObj = categories.find(c => c.id === category);
+
+            const formData = {
+                categoryId: category,
+                categoryName: categoryObj ? categoryObj.name : '',
+                awardName: awardName,
+                awardLevel: awardLevel,
+                awardDate: awardDate,
+                organizer: organizer,
+                description: description,
+                certificateImage: certificateImage
+            };
+
+            DraftManager.save(user.id, formData);
+            Toast.show('草稿保存成功！', 'success');
+        }
+
+        // 恢复草稿到表单
+        function restoreDraft() {
+            const user = Auth.getCurrentUser();
+            const draft = DraftManager.get(user.id);
+            if (!draft) return;
+
+            const formData = draft.formData;
+            document.getElementById('awardCategory').value = formData.categoryId || '';
+            document.getElementById('awardName').value = formData.awardName || '';
+            document.getElementById('awardLevel').value = formData.awardLevel || '';
+            document.getElementById('awardDate').value = formData.awardDate || '';
+            document.getElementById('organizer').value = formData.organizer || '';
+            document.getElementById('description').value = formData.description || '';
+
+            if (formData.certificateImage) {
+                document.getElementById('imagePreview').src = formData.certificateImage;
+                document.getElementById('previewContainer').style.display = 'block';
+                document.querySelector('.file-upload').style.display = 'none';
+            }
+
+            Toast.show('草稿已恢复，请检查内容后提交', 'info');
+        }
+
+        // 草稿恢复确认弹窗
+        function showDraftRestoreModal() {
+            const user = Auth.getCurrentUser();
+            const draft = DraftManager.get(user.id);
+            if (!draft) return;
+
+            const updateTime = new Date(draft.updateTime).toLocaleString('zh-CN');
+
+            const modal = document.createElement('div');
+            modal.id = 'draftRestoreModal';
+            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10000;';
+            modal.innerHTML = `
+                <div style="background:white;border-radius:12px;padding:30px;max-width:420px;width:90%;box-shadow:0 4px 20px rgba(0,0,0,0.15);border-top:4px solid var(--primary-color);">
+                    <div style="text-align:center;margin-bottom:20px;">
+                        <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg, var(--primary-color), #4f46e5);display:inline-flex;align-items:center;justify-content:center;margin-bottom:15px;">
+                            <i class="fa fa-file-alt" style="font-size:28px;color:white;"></i>
+                        </div>
+                        <h3 style="margin:0 0 10px;color:#333;">您有一份未提交的草稿</h3>
+                        <p style="margin:0;color:#666;font-size:14px;">上次保存时间：${updateTime}</p>
+                    </div>
+                    <div style="display:grid;gap:12px;">
+                        <button onclick="document.getElementById('draftRestoreModal').remove();restoreDraft();" style="background:var(--primary-color);color:white;border:none;padding:14px;border-radius:8px;font-size:16px;cursor:pointer;font-weight:500;">
+                            <i class="fa fa-upload"></i> 恢复草稿
+                        </button>
+                        <button onclick="document.getElementById('draftRestoreModal').remove();" style="background:var(--light-bg);color:#666;border:none;padding:14px;border-radius:8px;font-size:16px;cursor:pointer;">
+                            <i class="fa fa-times"></i> 不用了，谢谢
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // 移动端菜单
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
